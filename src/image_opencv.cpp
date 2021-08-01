@@ -696,6 +696,18 @@ extern "C" double get_capture_frame_count_cv(cap_cv *cap)
 }
 // ----------------------------------------
 
+extern "C" double get_capture_frame_pos_cv(cap_cv *cap)
+{
+    try {
+        cv::VideoCapture &cpp_cap = *(cv::VideoCapture *)cap;
+        return cpp_cap.get(cv::CAP_PROP_POS_MSEC);
+    } 
+    catch (...) {
+        cerr << " OpenCV exception: Can't get CAP_PROP_FRAME_COUNT of source videofile. \n";
+    }
+    return 0;
+}
+
 extern "C" int set_capture_property_cv(cap_cv *cap, int property_id, double value)
 {
     try {

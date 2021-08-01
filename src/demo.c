@@ -47,6 +47,8 @@ mat_cv* in_img;
 mat_cv* det_img;
 mat_cv* show_img;
 
+static double g_video_pos = 0;
+
 static volatile int flag_exit;
 static int letter_box = 0;
 
@@ -70,12 +72,14 @@ void *fetch_in_thread(void *ptr)
         else
             in_s = get_image_from_stream_resize(cap, net.w, net.h, net.c, &in_img, dont_close_stream);
         if (!in_s.data) {
-            printf("Stream closed.\n");
+//            printf("Stream closed.\n");
             custom_atomic_store_int(&flag_exit, 1);
             custom_atomic_store_int(&run_fetch_in_thread, 0);
             //exit(EXIT_FAILURE);
             return 0;
-        }
+        } else {
+		g_video_pos = get_capture_frame_pos_cv(cap);
+	}
         //in_s = resize_image(in, net.w, net.h);
 
         custom_atomic_store_int(&run_fetch_in_thread, 0);
@@ -283,7 +287,9 @@ void demo(char *cfgfile, char *weightfile, float thresh, float hier_thresh, int 
             //printf("\033[2J");
             //printf("\033[1;1H");
             //printf("\nFPS:%.1f\n", fps);
-            printf("Objects:\n\n");
+	    printf("+++++++++++++++++++++++++++\n");
+	    printf("Frame at %.1f msec :\n", g_video_pos);
+            printf("Objects:\n");
 
             ++frame_id;
             if (demo_json_port > 0) {
@@ -305,7 +311,8 @@ void demo(char *cfgfile, char *weightfile, float thresh, float hier_thresh, int 
             if (!benchmark && !dontdraw_bbox) draw_detections_cv_v3(show_img, local_dets, local_nboxes, demo_thresh, demo_names, demo_alphabet, demo_classes, demo_ext_output);
             free_detections(local_dets, local_nboxes);
 
-            printf("\nFPS:%.1f \t AVG_FPS:%.1f\n", fps, avg_fps);
+	    printf("+++++++++++++++++++++++++++\n");
+            printf("FPS:%.1f \t AVG_FPS:%.1f\n", fps, avg_fps);
 
             if(!prefix){
                 if (!dont_show) {
@@ -340,7 +347,7 @@ void demo(char *cfgfile, char *weightfile, float thresh, float hier_thresh, int 
             // save video file
             if (output_video_writer && show_img) {
                 write_frame_cv(output_video_writer, show_img);
-                printf("\n cvWriteFrame \n");
+                //printf("\n cvWriteFrame \n");
             }
 
             while (custom_atomic_load_int(&run_detect_in_thread)) {
