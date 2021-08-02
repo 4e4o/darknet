@@ -907,12 +907,14 @@ extern "C" void save_cv_jpg(mat_cv *img_src, const char *name)
 // ====================================================================
 // Draw Detection
 // ====================================================================
-extern "C" void draw_detections_cv_v3(mat_cv* mat, detection *dets, int num, float thresh, char **names, image **alphabet, int classes, int ext_output)
+extern "C" int draw_detections_cv_v3(mat_cv* mat, detection *dets, int num, float thresh, char **names, image **alphabet, int classes, int ext_output)
 {
+	int det_count = 0;
+
     try {
         cv::Mat *show_img = (cv::Mat*)mat;
         int i, j;
-        if (!show_img) return;
+        if (!show_img) return det_count;
         static int frame_id = 0;
         frame_id++;
 
@@ -923,6 +925,12 @@ extern "C" void draw_detections_cv_v3(mat_cv* mat, detection *dets, int num, flo
                 int show = strncmp(names[j], "dont_show", 9);
                 if (dets[i].prob[j] > thresh && show) {
                     if (class_id < 0) {
+			if (det_count == 0) {
+				printf("+++++++++++++++++++++++++++\n");
+            			printf("Objects:\n");
+			}
+
+			det_count++;
                         strcat(labelstr, names[j]);
                         class_id = j;
                         char buff[20];
@@ -1046,6 +1054,8 @@ extern "C" void draw_detections_cv_v3(mat_cv* mat, detection *dets, int num, flo
     catch (...) {
         cerr << "OpenCV exception: draw_detections_cv_v3() \n";
     }
+
+	return det_count;
 }
 // ----------------------------------------
 

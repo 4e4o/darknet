@@ -264,6 +264,7 @@ void demo(char *cfgfile, char *weightfile, float thresh, float hier_thresh, int 
     float avg_fps = 0;
     int frame_counter = 0;
     int global_frame_counter = 0;
+    int dets_count = 0;
 
     while(1){
         ++count;
@@ -287,9 +288,9 @@ void demo(char *cfgfile, char *weightfile, float thresh, float hier_thresh, int 
             //printf("\033[2J");
             //printf("\033[1;1H");
             //printf("\nFPS:%.1f\n", fps);
-	    printf("+++++++++++++++++++++++++++\n");
-	    printf("Frame at %.1f msec :\n", g_video_pos);
-            printf("Objects:\n");
+//	    printf("+++++++++++++++++++++++++++\n");
+//	    printf("Frame at %.1f msec :\n", g_video_pos);
+//            printf("Objects:\n");
 
             ++frame_id;
             if (demo_json_port > 0) {
@@ -308,11 +309,18 @@ void demo(char *cfgfile, char *weightfile, float thresh, float hier_thresh, int 
                 }
             }
 
-            if (!benchmark && !dontdraw_bbox) draw_detections_cv_v3(show_img, local_dets, local_nboxes, demo_thresh, demo_names, demo_alphabet, demo_classes, demo_ext_output);
+	    dets_count = 0;
+
+            if (!benchmark && !dontdraw_bbox) dets_count = draw_detections_cv_v3(show_img, local_dets, local_nboxes, demo_thresh, demo_names, demo_alphabet, demo_classes, demo_ext_output);
             free_detections(local_dets, local_nboxes);
 
-	    printf("+++++++++++++++++++++++++++\n");
-            printf("FPS:%.1f \t AVG_FPS:%.1f\n", fps, avg_fps);
+                if (dets_count > 0) {
+			printf("Video position = %.1f msec\n", g_video_pos);
+                        printf("+++++++++++++++++++++++++++\n");
+                }
+
+//	    printf("+++++++++++++++++++++++++++\n");
+//            printf("FPS:%.1f \t AVG_FPS:%.1f\n", fps, avg_fps);
 
             if(!prefix){
                 if (!dont_show) {
